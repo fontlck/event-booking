@@ -1,7 +1,7 @@
 import React from "react";
 import dayjs from "../utils_time";
 
-export default function Upcoming({ events = [] }) {
+export default function Upcoming({ events = [], models = [] }) {
   const today = dayjs();
   const upcoming = [...events]
     .filter(
@@ -11,6 +11,22 @@ export default function Upcoming({ events = [] }) {
     )
     .sort((a, b) => (a.startDate || "").localeCompare(b.startDate))
     .slice(0, 5);
+
+  // ฟังก์ชัน format วันที่ (สั้น)
+  function formatDateRange(start, end) {
+    const s = dayjs(start);
+    const e = end ? dayjs(end) : null;
+
+    if (e && !s.isSame(e, "day")) {
+      if (s.year() === e.year()) {
+        return `${s.format("DD MMM")} - ${e.format("DD MMM YYYY")}`;
+      } else {
+        return `${s.format("DD MMM YYYY")} - ${e.format("DD MMM YYYY")}`;
+      }
+    } else {
+      return s.format("DD MMM YYYY");
+    }
+  }
 
   return (
     <div
@@ -23,29 +39,36 @@ export default function Upcoming({ events = [] }) {
       </div>
 
       <ul className="space-y-3">
-        {upcoming.map((e) => (
-          <li
-            key={e.id || e.eventName}
-            className="flex items-center justify-between p-3 rounded-xl"
-            style={{ backgroundColor: "#1a1a1a" }}
-          >
-            <div>
-              {/* Event Name */}
-              <div className="font-bold text-base" style={{ color: "#ceff00" }}>
-                {e.eventName}
+        {upcoming.map((e) => {
+          const model = models.find(
+            (m) => m.name?.trim().toLowerCase() === (e.model || "").trim().toLowerCase()
+          );
+          const bg = model?.colorBG || e.colorBG || "#1a1a1a";
+          const text = model?.colorText || e.colorText || "#ffffff";
+
+          return (
+            <li
+              key={e.id || e.eventName}
+              className="flex items-center justify-between p-3 rounded-xl"
+              style={{ backgroundColor: bg, color: text }}
+            >
+              <div>
+                {/* Event Name */}
+                <div className="font-bold text-base truncate">{e.eventName}</div>
+                {/* Location */}
+                <div className="text-sm opacity-80">{e.location}</div>
+                {/* Model */}
+                {e.model && (
+                  <div className="text-xs opacity-70">Model: {e.model}</div>
+                )}
               </div>
-              {/* Location */}
-              <div className="text-sm" style={{ color: "#9096d9" }}>
-                {e.location}
+              {/* Date */}
+              <div className="text-sm font-medium">
+                {formatDateRange(e.startDate, e.endDate)}
               </div>
-            </div>
-            {/* Date */}
-            <div className="text-sm" style={{ color: "#d1d1d1" }}>
-              {e.startDate}
-              {e.endDate ? ` → ${e.endDate}` : ""}
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
 
         {upcoming.length === 0 && (
           <div className="text-sm text-center py-2" style={{ color: "#9096d9" }}>

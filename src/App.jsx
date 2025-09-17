@@ -21,14 +21,33 @@ export default function App() {
   async function load() {
     try {
       const [ev, md] = await Promise.all([EventsAPI.list(), ModelsAPI.list()]);
-      setEvents(ev?.data || ev || []);
-      setModels(md?.data || md || []);
+      const eventsData = ev?.data || ev || [];
+      const modelsData = md?.data || md || [];
+
+      // ✅ merge model สีเข้า event (normalize ชื่อ)
+      const mergedEvents = eventsData.map((e) => {
+        const model = modelsData.find(
+          (m) =>
+            m.name?.trim().toLowerCase() === (e.model || "").trim().toLowerCase()
+        );
+        return {
+          ...e,
+          colorBG: model?.colorBG || "#caf419",
+          colorText: model?.colorText || "#000000",
+        };
+      });
+
+      console.log("Merged Events:", mergedEvents); // ✅ Debug
+
+      setEvents(mergedEvents);
+      setModels(modelsData);
     } catch (e) {
       console.warn("API not reachable, using empty lists", e);
       setEvents([]);
       setModels([]);
     }
   }
+
   useEffect(() => {
     load();
   }, []);
@@ -116,7 +135,7 @@ export default function App() {
             </div>
 
             {/* Calendar */}
-            <Calendar month={month} events={events} />
+            <Calendar month={month} events={events} models={models} />
 
             {/* Monthly Events */}
             <MonthlyTable
@@ -133,7 +152,7 @@ export default function App() {
           {/* Stats & Upcoming */}
           <div className="space-y-4">
             <Stats events={events} />
-            <Upcoming events={events} />
+            <Upcoming events={events} models={models} />
           </div>
         </div>
       </main>
