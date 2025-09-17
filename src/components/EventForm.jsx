@@ -21,24 +21,33 @@ export default function EventForm({ initial = {}, models = [], onCancel }) {
     paidFull: "FALSE",
   });
 
-  // โหลด initial value ถ้ามี
   useEffect(() => {
     if (initial) setForm((prev) => ({ ...prev, ...initial }));
   }, [initial]);
 
-  // อัปเดตค่า input
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  // submit ฟอร์ม → เรียก API
+  function normalizeDate(value) {
+    if (!value) return "";
+    return value.split("T")[0]; // YYYY-MM-DD
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const res = await EventsAPI.create(form);
+      const payload = {
+        ...form,
+        startDate: normalizeDate(form.startDate),
+        endDate: normalizeDate(form.endDate),
+        installDate: normalizeDate(form.installDate),
+      };
+
+      const res = await EventsAPI.create(payload);
       console.log("Saved:", res);
       alert("✅ Event saved to Google Sheet!");
-      // เคลียร์ฟอร์มหลังบันทึกเสร็จ
+
       setForm({
         eventName: "",
         location: "",
