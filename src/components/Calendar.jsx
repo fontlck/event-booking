@@ -55,10 +55,11 @@ export default function Calendar({ month, events = [] }) {
               {es.slice(0, 3).map((ev) => (
                 <div
                   key={ev.id || ev.eventName}
-                  className="truncate text-xs px-2 py-1 rounded"
+                  className="px-2 py-1 rounded text-xs leading-tight"
                   style={{ background: '#caf419', color: '#000' }}
                 >
-                  {ev.eventName}
+                  <div className="font-semibold">{ev.model || "-"}</div>
+                  <div className="truncate">{ev.eventName}</div>
                 </div>
               ))}
               {es.length > 3 && (
