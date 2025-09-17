@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { EventsAPI } from "../api";
 
-export default function EventForm({ initial = {}, models = [], onSubmit, onCancel }) {
+export default function EventForm({ initial = {}, models = [], onCancel }) {
   const [form, setForm] = useState({
     eventName: "",
     location: "",
@@ -20,17 +21,46 @@ export default function EventForm({ initial = {}, models = [], onSubmit, onCance
     paidFull: "FALSE",
   });
 
+  // โหลด initial value ถ้ามี
   useEffect(() => {
     if (initial) setForm((prev) => ({ ...prev, ...initial }));
   }, [initial]);
 
+  // อัปเดตค่า input
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e) {
+  // submit ฟอร์ม → เรียก API
+  async function handleSubmit(e) {
     e.preventDefault();
-    onSubmit(form);
+    try {
+      const res = await EventsAPI.create(form);
+      console.log("Saved:", res);
+      alert("✅ Event saved to Google Sheet!");
+      // เคลียร์ฟอร์มหลังบันทึกเสร็จ
+      setForm({
+        eventName: "",
+        location: "",
+        mapLink: "",
+        model: "",
+        startDate: "",
+        endDate: "",
+        staff: "",
+        installDate: "",
+        installTime: "",
+        openTime: "",
+        closeTime: "",
+        price: "",
+        transportFee: "",
+        note: "",
+        paidDeposit: "FALSE",
+        paidFull: "FALSE",
+      });
+    } catch (err) {
+      console.error("Error:", err);
+      alert("❌ Error saving event, please try again.");
+    }
   }
 
   const inputClass =
