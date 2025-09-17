@@ -56,7 +56,10 @@ export default function Calendar({ month, events = [] }) {
                 <div
                   key={ev.id || ev.eventName}
                   className="px-2 py-1 rounded text-xs leading-tight"
-                  style={{ background: '#caf419', color: '#000' }}
+                  style={{
+                    background: ev.colorBG || '#caf419',
+                    color: ev.colorText || '#000'
+                  }}
                 >
                   <div className="font-semibold">{ev.model || "-"}</div>
                   <div className="truncate">{ev.eventName}</div>
